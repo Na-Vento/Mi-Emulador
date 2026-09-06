@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Game Boy Color</title>
+    <title>Game Boy Color - Pokémon Rojo</title>
     <style>
         * {
             box-sizing: border-box;
@@ -48,6 +48,7 @@
             display: flex;
             flex-direction: column;
             align-items: center;
+            position: relative;
         }
 
         .gb-logo {
@@ -72,8 +73,10 @@
 
         #status {
             color: #ffca28;
-            font-size: 11px;
+            font-size: 12px;
+            font-weight: bold;
             margin-top: 5px;
+            text-align: center;
         }
 
         /* Controles */
@@ -141,7 +144,6 @@
         .btn-pill:active { background: #000; }
     </style>
 
-    <!-- Cargamos el motor local guardado en el repo -->
     <script src="gameboy.js"></script>
 </head>
 <body>
@@ -150,7 +152,7 @@
         <div class="screen-bezel">
             <div class="gb-logo">GAME BOY <span>COLOR</span></div>
             <canvas id="mainCanvas" width="160" height="144"></canvas>
-            <div id="status">Cargando ROM...</div>
+            <div id="status">TOCÁ LA PANTALLA PARA INICIAR</div>
         </div>
 
         <div class="controls">
@@ -178,36 +180,49 @@
     </div>
 
     <script>
-        document.addEventListener("DOMContentLoaded", function() {
+        let gb = null;
+        let started = false;
+
+        function initEmulator() {
+            if (started) return;
+            started = true;
+
             const status = document.getElementById('status');
             const canvas = document.getElementById('mainCanvas');
-            const romPath = 'Pokemon-Rojo-GBC.gbc'; // Tu juego
+            const romPath = 'Pokemon-Rojo-GBC.gbc';
 
             if (typeof GameBoyCore === 'undefined') {
-                status.innerText = "Error: no se encontró gameboy.js";
+                status.innerText = "Error: no se encontró gameboy.js en el repo";
                 return;
             }
 
+            status.innerText = "Cargando ROM...";
+
             try {
-                // Crear instancia del emulador
-                const gb = new GameBoyCore(canvas, null);
+                gb = new GameBoyCore(canvas, null);
 
-                fetch(romPath)
-                    .then(res => {
-                        if (!res.ok) throw new Error("ROM no encontrada");
-                        return res.arrayBuffer();
-                    })
-                    .then(buffer => {
-                        const binary = String.fromCharCode.apply(null, new Uint8Array(buffer));
+                // Carga nativa binaria para GameBoyCore
+                const xhr = new XMLHttpRequest();
+                xhr.open('GET', romPath, true);
+                xhr.overrideMimeType('text/plain; charset=x-user-defined');
+
+                xhr.onload = function() {
+                    if (xhr.status === 200) {
                         gb.start();
-                        gb.loadROM(binary);
+                        gb.loadROM(xhr.responseText);
                         status.style.display = 'none';
-                    })
-                    .catch(err => {
-                        status.innerText = "Error: ROM no encontrada en el repo";
-                    });
+                    } else {
+                        status.innerText = "Error " + xhr.status + ": No se halló el archivo .gbc";
+                    }
+                };
 
-                // Mapeo táctil para controles
+                xhr.onerror = function() {
+                    status.innerText = "Error de red al cargar la ROM";
+                };
+
+                xhr.send();
+
+                // Asignación de botones táctiles
                 const mapBtn = (id, key) => {
                     const el = document.getElementById(id);
                     if (!el) return;
@@ -227,9 +242,14 @@
                 mapBtn('btn-down', 7);
 
             } catch (e) {
-                status.innerText = "Error iniciando motor";
+                status.innerText = "Error iniciando el motor";
+                console.error(e);
             }
-        });
+        }
+
+        // Requiere primer toque para desbloquear audio del navegador
+        window.addEventListener('click', initEmulator);
+        window.addEventListener('touchstart', initEmulator);
     </script>
 </body>
 </html>
