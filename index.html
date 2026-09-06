@@ -9,9 +9,9 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; display: flex; flex-direction: column; }
         
         #screen-container { width: 100vw; height: 42vh; display: flex; justify-content: center; align-items: center; background: #050505; }
-        canvas { max-width: 100%; max-height: 100%; image-rendering: pixelated; }
+        #game-screen { width: 160px; height: 144px; max-width: 100%; max-height: 100%; transform: scale(2); transform-origin: center; }
 
-        /* Controles táctiles estilo My Boy! */
+        /* Controles estilo My Boy! */
         #pad { width: 100vw; height: 58vh; background: #121212; display: flex; flex-direction: column; justify-content: space-around; padding: 15px; }
         .main-controls { display: flex; justify-content: space-between; align-items: center; width: 100%; }
         
@@ -33,7 +33,7 @@
 <body>
 
     <div id="screen-container">
-        <canvas id="mainCanvas" width="160" height="144"></canvas>
+        <div id="emulator"></div>
     </div>
 
     <div id="pad">
@@ -54,40 +54,23 @@
         </div>
     </div>
 
-    <!-- Carga local del motor -->
-    <script src="gb.js"></script>
+    <script src="https://binjgb.github.io/binjgb.js"></script>
     <script>
         const ROM_PATH = 'Roms/Pokemon - Rojo - GBC.gbc';
-        let gameboy = null;
 
-        window.addEventListener('load', () => {
-            fetch(ROM_PATH)
-                .then(res => res.arrayBuffer())
-                .then(buffer => {
-                    const canvas = document.getElementById('mainCanvas');
-                    
-                    // Inicializar el motor local GameBoyCore
-                    gameboy = new GameBoyCore(canvas, new Uint8Array(buffer));
-                    gameboy.start();
+        window.addEventListener('load', async () => {
+            try {
+                const response = await fetch(ROM_PATH);
+                const romData = new Uint8Array(await response.arrayBuffer());
+                
+                // Inicializar motor liviano WebAssembly binjgb
+                const emulator = await Binjgb();
+                emulator.loadRom(romData);
+                emulator.start();
 
-                    // Vincular controles táctiles
-                    const bindKey = (id, keyIndex) => {
-                        const el = document.getElementById(id);
-                        el.addEventListener('touchstart', (e) => { e.preventDefault(); gameboy.JoyPadEvent(keyIndex, true); });
-                        el.addEventListener('touchend', (e) => { e.preventDefault(); gameboy.JoyPadEvent(keyIndex, false); });
-                    };
-
-                    // Mapeo de teclas internas (A:0, B:1, Select:2, Start:3, Right:4, Left:5, Up:6, Down:7)
-                    bindKey('a', 0);
-                    bindKey('b', 1);
-                    bindKey('select', 2);
-                    bindKey('start', 3);
-                    bindKey('right', 4);
-                    bindKey('left', 5);
-                    bindKey('up', 6);
-                    bindKey('down', 7);
-                })
-                .catch(err => console.error("Error al cargar la ROM:", err));
+            } catch (err) {
+                console.error("Error al arrancar:", err);
+            }
         });
     </script>
 </body>
