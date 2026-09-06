@@ -3,45 +3,78 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Mi Emulador GBC - Pokémon</title>
+    <title>Emulador GBC GitHub</title>
     <style>
         body {
-            background-color: #121212;
-            color: #ffffff;
-            font-family: Arial, sans-serif;
+            background: #000;
+            color: #fff;
+            font-family: sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
-            overflow: hidden;
+            touch-action: none;
         }
-        #game {
+        #emulator-container {
             width: 100%;
-            max-width: 480px;
-            height: 60vh;
+            max-width: 400px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        canvas {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            width: 100%;
+            max-width: 400px;
+            background: #111;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(3, 70px);
+            gap: 10px;
+            margin-top: 20px;
+        }
+        button {
+            padding: 15px;
+            font-size: 16px;
+            background: #333;
+            color: #fff;
+            border: 1px solid #555;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
 
-    <div id="game"></div>
+    <div id="emulator-container">
+        <canvas id="screen" width="160" height="144"></canvas>
+        <p id="status">Cargando ROM...</p>
+    </div>
 
+    <!-- Usamos una librería web liviana de emulación -->
+    <script src="https://cdn.jsdelivr.net/npm/jsgb@0.1.0/index.min.js"></script>
     <script>
-        // Configuración para EmulatorJS cargando tu ROM directamente desde GitHub
-        window.EJS_player = "#game";
-        window.EJS_core = "gb"; // Núcleo para Game Boy / GBC
-        window.EJS_gameUrl = "./Roms/Pokemon - Rojo - GBC.gbc"; // Ruta exacta a tu ROM
-        window.EJS_autostart = true;
-        window.EJS_color = "#007acc";
-        window.EJS_startOnLoaded = true;
-        window.EJS_controls = {
-            // Controles optimizados y táctiles automáticos para móviles
-            useDatabase: true
-        };
+        // Carga automática de la ROM mediante fetch para evitar errores de ruta en GitHub Pages
+        fetch('./Roms/Pokemon - Rojo - GBC.gbc')
+            .then(response => {
+                if (!response.ok) throw new Error('No se pudo encontrar la ROM en la ruta especificada.');
+                return response.arrayBuffer();
+            })
+            .then(buffer => {
+                document.getElementById('status').innerText = '';
+                const romData = new Uint8Array(buffer);
+                
+                // Inicialización del emulador en el canvas
+                window.gb = new GameBoy();
+                gb.loadRom(romData);
+                gb.start();
+            })
+            .catch(error => {
+                document.getElementById('status').innerText = 'Error: ' + error.message;
+            });
     </script>
-    <script src="https://www.emulatorjs.com/stable/data/loader.js"></script>
-
 </body>
 </html>
