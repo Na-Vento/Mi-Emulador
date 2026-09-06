@@ -3,102 +3,47 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>GBC Pokémon Automático</title>
+    <title>RetroArch Web - Pokémon GBC</title>
     <style>
-        * { box-sizing: border-box; touch-action: manipulation; }
         body {
-            background: #0f172a; color: #fff; font-family: sans-serif;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            min-height: 100vh; margin: 0; padding: 10px;
+            background-color: #121212;
+            color: #ffffff;
+            font-family: sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            touch-action: none;
         }
-        #screen {
-            background: #000; width: 100%; max-width: 320px; height: 288px;
-            image-rendering: pixelated; border: 3px solid #334155; border-radius: 8px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+        #app {
+            width: 100%;
+            max-width: 480px;
+            height: 70vh;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.6);
         }
-        .controls { display: flex; flex-direction: column; align-items: center; gap: 12px; margin-top: 20px; width: 100%; max-width: 320px; }
-        .dpad { display: grid; grid-template-columns: repeat(3, 55px); grid-template-rows: repeat(3, 55px); gap: 2px; }
-        .action-btns { display: flex; gap: 25px; }
-        .btn {
-            background: #1e293b; color: white; border: 1px solid #475569; border-radius: 10px;
-            display: flex; align-items: center; justify-content: center; font-weight: bold;
-            user-select: none; -webkit-user-select: none; font-size: 18px;
+        iframe {
+            width: 100%;
+            height: 100%;
+            border: none;
         }
-        .btn:active { background: #334155; }
-        .btn-a, .btn-b { width: 60px; height: 60px; border-radius: 50%; background: #dc2626; }
-        .btn-b { background: #ca8a04; }
-        #status { font-size: 14px; color: #94a3b8; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <div id="status">Iniciando emulador...</div>
-    <canvas id="screen" width="160" height="144"></canvas>
-
-    <div class="controls">
-        <div class="dpad">
-            <div></div><div class="btn" id="up">▲</div><div></div>
-            <div class="btn" id="left">◀</div><div></div><div class="btn" id="right">▶</div>
-            <div></div><div class="btn" id="down">▼</div><div></div>
-        </div>
-        <div class="action-btns">
-            <div class="btn btn-b" id="btn-b">B</div>
-            <div class="btn btn-a" id="btn-a">A</div>
-        </div>
-        <div style="display: flex; gap: 15px;">
-            <div class="btn" id="select" style="width: 80px; height: 35px; font-size: 12px;">SELECT</div>
-            <div class="btn" id="start" style="width: 80px; height: 35px; font-size: 12px;">START</div>
-        </div>
+    <div id="app">
+        <!-- Contenedor iframe oficial de RetroArch Web / Buildbot -->
+        <iframe src="https://web.libretro.com/?core=gambatte&rom=https://raw.githubusercontent.com/TU_USUARIO/TU_REPOSITORIO/main/Pokemon-Rojo-GBC.gbc" allowfullscreen></iframe>
     </div>
 
-    <!-- Núcleo del emulador ultrarrápido -->
-    <script src="https://unpkg.com/binjgb@0.5.0/binjgb.js"></script>
-    <script>
-        // Paso único: Pega aquí la cadena Base64 de tu ROM para que se autocargue sin archivos externos
-        // (Si prefieres mantener la ROM en el repositorio sin convertirla a texto, asegúrate de que el archivo
-        // se encuentre en la raíz junto al index.html y usa la carga directa por fetch limpia abajo).
-        
-        async function init() {
-            try {
-                const response = await fetch('./Pokemon-Rojo-GBC.gbc');
-                if (!response.ok) throw new Error("No se encontró el archivo en la raíz");
-                const buffer = await response.arrayBuffer();
-                startEmulator(new Uint8Array(buffer));
-            } catch (err) {
-                document.getElementById('status').innerText = "Error: Coloca 'Pokemon-Rojo-GBC.gbc' exactamente en la raíz del repositorio.";
-            }
-        }
+    <div style="margin-top: 10px; font-size: 13px; color: #888; text-align: center;">
+        Compatible con controles táctiles y guardado en la nube/navegador
+    </div>
 
-        function startEmulator(romData) {
-            document.getElementById('status').innerText = "¡Partida lista!";
-            Binjgb().then(binjgb => {
-                const emulator = new binjgb.Emulator();
-                emulator.loadRom(romData);
-                const canvas = document.getElementById('screen');
-                
-                function loop() {
-                    emulator.runFrame();
-                    emulator.drawCanvas(canvas);
-                    requestAnimationFrame(loop);
-                }
-                requestAnimationFrame(loop);
-                bindControls(emulator);
-            });
-        }
-
-        function bindControls(emu) {
-            const keys = {
-                'up': 'Up', 'down': 'Down', 'left': 'Left', 'right': 'Right',
-                'btn-a': 'A', 'btn-b': 'B', 'start': 'Start', 'select': 'Select'
-            };
-            Object.keys(keys).forEach(id => {
-                const el = document.getElementById(id);
-                el.ontouchstart = el.onmousedown = (e) => { e.preventDefault(); emu.setKeyDown(keys[id]); };
-                el.ontouchend = el.onmouseup = (e) => { e.preventDefault(); emu.setKeyUp(keys[id]); };
-            });
-        }
-
-        init();
-    </script>
 </body>
 </html>
