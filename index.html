@@ -3,39 +3,233 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Rojo - GBC</title>
+    <title>Game Boy Color</title>
     <style>
+        * {
+            box-sizing: border-box;
+            user-select: none;
+            -webkit-user-select: none;
+        }
         body, html {
             margin: 0;
             padding: 0;
             width: 100%;
             height: 100%;
-            background-color: #000;
+            background-color: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-family: sans-serif;
             overflow: hidden;
         }
-        #game {
-            width: 100vw;
-            height: 100vh;
+
+        /* Chasis Game Boy Color Rojo */
+        .gb-container {
+            width: 100%;
+            max-width: 380px;
+            height: 95vh;
+            max-height: 680px;
+            background: #c21535;
+            border-radius: 20px 20px 50px 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.6);
+            position: relative;
         }
+
+        /* Marco de Pantalla */
+        .screen-bezel {
+            width: 100%;
+            background: #222;
+            border-radius: 10px 10px 30px 10px;
+            padding: 15px 15px 20px 15px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .gb-logo {
+            color: #fff;
+            font-size: 11px;
+            font-weight: bold;
+            margin-bottom: 8px;
+            letter-spacing: 1px;
+        }
+
+        .gb-logo span { color: #9c27b0; }
+
+        canvas {
+            width: 160px;
+            height: 144px;
+            image-rendering: pixelated;
+            background-color: #8b956d;
+            transform: scale(1.6);
+            transform-origin: top center;
+            margin-bottom: 70px;
+        }
+
+        #status {
+            color: #ffca28;
+            font-size: 11px;
+            margin-top: 5px;
+        }
+
+        /* Controles */
+        .controls {
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 25px;
+            padding: 0 10px;
+        }
+
+        /* Cruceta D-Pad */
+        .dpad {
+            width: 110px;
+            height: 110px;
+            position: relative;
+        }
+        .dpad-btn {
+            position: absolute;
+            background: #222;
+            border: none;
+            box-shadow: inset 0 2px 0 rgba(255,255,255,0.2);
+        }
+        .dpad-btn:active { background: #000; }
+        .dpad-up { top: 0; left: 36px; width: 38px; height: 38px; border-radius: 4px 4px 0 0; }
+        .dpad-down { bottom: 0; left: 36px; width: 38px; height: 38px; border-radius: 0 0 4px 4px; }
+        .dpad-left { top: 36px; left: 0; width: 38px; height: 38px; border-radius: 4px 0 0 4px; }
+        .dpad-right { top: 36px; right: 0; width: 38px; height: 38px; border-radius: 0 4px 4px 0; }
+        .dpad-center { top: 36px; left: 36px; width: 38px; height: 38px; background: #222; }
+
+        /* Botones A y B */
+        .action-buttons {
+            display: flex;
+            gap: 12px;
+            transform: rotate(-15deg);
+        }
+        .btn-round {
+            width: 48px;
+            height: 48px;
+            background: #222;
+            color: #fff;
+            border-radius: 50%;
+            border: none;
+            font-weight: bold;
+            font-size: 16px;
+            box-shadow: 2px 4px 6px rgba(0,0,0,0.4);
+        }
+        .btn-round:active { background: #000; transform: scale(0.95); }
+
+        /* Select y Start */
+        .system-buttons {
+            display: flex;
+            gap: 20px;
+            margin-top: 25px;
+        }
+        .btn-pill {
+            width: 55px;
+            height: 14px;
+            background: #222;
+            border-radius: 10px;
+            border: none;
+            transform: rotate(-25deg);
+        }
+        .btn-pill:active { background: #000; }
     </style>
+
+    <!-- Cargamos el motor local guardado en el repo -->
+    <script src="gameboy.js"></script>
 </head>
 <body>
 
-    <div id="game"></div>
+    <div class="gb-container">
+        <div class="screen-bezel">
+            <div class="gb-logo">GAME BOY <span>COLOR</span></div>
+            <canvas id="mainCanvas" width="160" height="144"></canvas>
+            <div id="status">Cargando ROM...</div>
+        </div>
 
-    <script type="text/javascript">
-        EJS_player = '#game';
-        EJS_core = 'gbc';
-        EJS_gameUrl = 'Pokemon-Rojo-GBC.gbc';
-        EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-        EJS_startOnLoaded = true;
+        <div class="controls">
+            <!-- D-PAD -->
+            <div class="dpad">
+                <button class="dpad-btn dpad-up" id="btn-up"></button>
+                <button class="dpad-btn dpad-left" id="btn-left"></button>
+                <button class="dpad-btn dpad-center"></button>
+                <button class="dpad-btn dpad-right" id="btn-right"></button>
+                <button class="dpad-btn dpad-down" id="btn-down"></button>
+            </div>
 
-        // Forzar controles táctiles en pantalla estilo Game Boy Color
-        EJS_VirtualGamepadSettings = {
-            layout: 'gbc'
-        };
+            <!-- BOTONES A / B -->
+            <div class="action-buttons">
+                <button class="btn-round" id="btn-b">B</button>
+                <button class="btn-round" id="btn-a">A</button>
+            </div>
+        </div>
+
+        <!-- SELECT / START -->
+        <div class="system-buttons">
+            <button class="btn-pill" id="btn-select"></button>
+            <button class="btn-pill" id="btn-start"></button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const status = document.getElementById('status');
+            const canvas = document.getElementById('mainCanvas');
+            const romPath = 'Pokemon-Rojo-GBC.gbc'; // Tu juego
+
+            if (typeof GameBoyCore === 'undefined') {
+                status.innerText = "Error: no se encontró gameboy.js";
+                return;
+            }
+
+            try {
+                // Crear instancia del emulador
+                const gb = new GameBoyCore(canvas, null);
+
+                fetch(romPath)
+                    .then(res => {
+                        if (!res.ok) throw new Error("ROM no encontrada");
+                        return res.arrayBuffer();
+                    })
+                    .then(buffer => {
+                        const binary = String.fromCharCode.apply(null, new Uint8Array(buffer));
+                        gb.start();
+                        gb.loadROM(binary);
+                        status.style.display = 'none';
+                    })
+                    .catch(err => {
+                        status.innerText = "Error: ROM no encontrada en el repo";
+                    });
+
+                // Mapeo táctil para controles
+                const mapBtn = (id, key) => {
+                    const el = document.getElementById(id);
+                    if (!el) return;
+                    el.addEventListener('touchstart', (e) => { e.preventDefault(); gb.JoyPadEvent(key, true); });
+                    el.addEventListener('touchend', (e) => { e.preventDefault(); gb.JoyPadEvent(key, false); });
+                    el.addEventListener('mousedown', () => gb.JoyPadEvent(key, true));
+                    el.addEventListener('mouseup', () => gb.JoyPadEvent(key, false));
+                };
+
+                mapBtn('btn-a', 0);
+                mapBtn('btn-b', 1);
+                mapBtn('btn-select', 2);
+                mapBtn('btn-start', 3);
+                mapBtn('btn-right', 4);
+                mapBtn('btn-left', 5);
+                mapBtn('btn-up', 6);
+                mapBtn('btn-down', 7);
+
+            } catch (e) {
+                status.innerText = "Error iniciando motor";
+            }
+        });
     </script>
-    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
-
 </body>
 </html>
