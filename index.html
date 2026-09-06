@@ -3,33 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emulador GBC Online</title>
-    <style>
-        body {
-            background-color: #000;
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            overflow: hidden;
-        }
-    </style>
+    <title>Emulador GBC</title>
 </head>
 <body>
-
-    <!-- El motor se encargará de inyectar y gestionar la pantalla y los controles -->
     <script src="gb.js"></script>
-    <script>
-        // Configura o arranca el motor pasando la ruta de tu ROM según la estructura de Grant Galitz
-        window.onload = function() {
-            if (typeof GameBoyStart === "function") {
-                GameBoyStart("Roms/Pokemon%20-%20Rojo%20-%20GBC.gbc");
-            } else if (typeof run === "function") {
-                run("Roms/Pokemon%20-%20Rojo%20-%20GBC.gbc");
-            }
-        };
-    </script>
 </body>
 </html>
