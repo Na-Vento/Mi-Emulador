@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Mi Emulador GBC - Pokémon</title>
+    <style>
+        body {
+            background-color: #121212;
+            color: #ffffff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+        #game {
+            width: 100%;
+            max-width: 480px;
+            height: 60vh;
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game"></div>
+
+    <script>
+        // Configuración para EmulatorJS cargando tu ROM directamente desde GitHub
+        window.EJS_player = "#game";
+        window.EJS_core = "gb"; // Núcleo para Game Boy / GBC
+        window.EJS_gameUrl = "./Roms/Pokemon - Rojo - GBC.gbc"; // Ruta exacta a tu ROM
+        window.EJS_autostart = true;
+        window.EJS_color = "#007acc";
+        window.EJS_startOnLoaded = true;
+        window.EJS_controls = {
+            // Controles optimizados y táctiles automáticos para móviles
+            useDatabase: true
+        };
+    </script>
+    <script src="https://www.emulatorjs.com/stable/data/loader.js"></script>
+
+</body>
+</html>
