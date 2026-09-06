@@ -3,78 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Emulador GBC GitHub</title>
+    <title>Emulador GBC Pokémon</title>
     <style>
         body {
-            background: #000;
-            color: #fff;
-            font-family: sans-serif;
+            background-color: #0d1117;
+            color: #c9d1d9;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             height: 100vh;
             margin: 0;
+            overflow: hidden;
             touch-action: none;
         }
-        #emulator-container {
+        #wasmboy-container {
             width: 100%;
-            max-width: 400px;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
+            max-width: 420px;
+            height: 65vh;
+            background: #000;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.5);
+            overflow: hidden;
         }
-        canvas {
-            image-rendering: pixelated;
-            image-rendering: crisp-edges;
-            width: 100%;
-            max-width: 400px;
-            background: #111;
-        }
-        .controls {
-            display: grid;
-            grid-template-columns: repeat(3, 70px);
-            gap: 10px;
-            margin-top: 20px;
-        }
-        button {
-            padding: 15px;
-            font-size: 16px;
-            background: #333;
-            color: #fff;
-            border: 1px solid #555;
-            border-radius: 8px;
+        .info {
+            margin-top: 15px;
+            font-size: 14px;
+            color: #8b949e;
+            text-align: center;
         }
     </style>
 </head>
 <body>
 
-    <div id="emulator-container">
-        <canvas id="screen" width="160" height="144"></canvas>
-        <p id="status">Cargando ROM...</p>
-    </div>
+    <div id="wasmboy-container"></div>
+    <div class="info">Compatible con controles táctiles y guardado automático</div>
 
-    <!-- Usamos una librería web liviana de emulación -->
-    <script src="https://cdn.jsdelivr.net/npm/jsgb@0.1.0/index.min.js"></script>
+    <!-- Importar WasmBoy mediante CDN estable -->
+    <script src="https://cdn.jsdelivr.net/npm/@wasmboy/wasmboy@latest/dist/wasmboy.js"></script>
     <script>
-        // Carga automática de la ROM mediante fetch para evitar errores de ruta en GitHub Pages
-        fetch('./Roms/Pokemon - Rojo - GBC.gbc')
-            .then(response => {
-                if (!response.ok) throw new Error('No se pudo encontrar la ROM en la ruta especificada.');
-                return response.arrayBuffer();
-            })
-            .then(buffer => {
-                document.getElementById('status').innerText = '';
-                const romData = new Uint8Array(buffer);
-                
-                // Inicialización del emulador en el canvas
-                window.gb = new GameBoy();
-                gb.loadRom(romData);
-                gb.start();
-            })
-            .catch(error => {
-                document.getElementById('status').innerText = 'Error: ' + error.message;
-            });
+        window.addEventListener('load', async () => {
+            const container = document.getElementById('wasmboy-container');
+            
+            try {
+                // Configuración e inicio automático cargando la ROM desde tu repositorio
+                await WasmBoy.config({
+                    cartridgeURL: './Roms/Pokemon - Rojo - GBC.gbc',
+                    audioEnabled: true,
+                    isGbcColorization: true,
+                });
+
+                await WasmBoy.play();
+            } catch (error) {
+                console.error("Error al iniciar WasmBoy:", error);
+                document.querySelector('.info').innerText = "Error al cargar la ROM. Verifica la ruta.";
+            }
+        });
     </script>
 </body>
 </html>
