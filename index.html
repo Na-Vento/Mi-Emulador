@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GBC Emulator</title>
+    <title>Pokémon Rojo - GBC</title>
     <style>
         body, html {
             margin: 0;
@@ -14,6 +14,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            overflow: hidden;
         }
         #game {
             width: 100%;
@@ -24,14 +25,18 @@
     </style>
 </head>
 <body>
+
     <div id="game"></div>
 
     <script type="text/javascript">
         EJS_player = '#game';
         EJS_core = 'gbc';
-        EJS_gameUrl = 'Pokemon-Rojo-GBC.gbc'; // Nombre exacto de tu archivo en el repo
-        EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+        EJS_gameUrl = 'Pokemon-Rojo-GBC.gbc';
+        
+        // CDN actualizado apuntando a jsDelivr para evitar errores de cores faltantes
+        EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/emulatorjs/emulatorjs@latest/data/';
     </script>
-    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+    <script src="https://cdn.jsdelivr.net/gh/emulatorjs/emulatorjs@latest/data/loader.js"></script>
+
 </body>
 </html>
