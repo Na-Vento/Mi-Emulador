@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Mi Emulador Pokémon</title>
+    <style>
+        body, html { margin: 0; padding: 0; height: 100%; overflow: hidden; background: #000; }
+        #game { width: 100vw; height: 100vh; }
+    </style>
+</head>
+<body>
+    <div id="game"></div>
+
+    <script type="text/javascript">
+        EJS_player = '#game';
+        EJS_core = 'mgba'; // Núcleo para Game Boy / GBA
+        EJS_gameName = 'Pokemon';
+        EJS_gameUrl = 'roms/pokemon.gba'; // Ruta a tu ROM en el repositorio
+        EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/'; // Motor del emulador
+        EJS_startOnLoaded = true; // Inicia automáticamente
+    </script>
+    <script src="https://cdn.emulatorjs.org/stable/data/loader.js"></script>
+</body>
+</html>
