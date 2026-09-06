@@ -9,7 +9,7 @@
         body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; display: flex; flex-direction: column; }
         
         #screen-container { width: 100vw; height: 42vh; display: flex; justify-content: center; align-items: center; background: #050505; }
-        canvas { width: 160px; height: 144px; max-width: 100%; max-height: 100%; transform: scale(2.2); transform-origin: center; image-rendering: pixelated; }
+        #emulator-iframe { width: 100%; height: 100%; border: none; }
 
         /* Controles estilo My Boy! */
         #pad { width: 100vw; height: 58vh; background: #121212; display: flex; flex-direction: column; justify-content: space-around; padding: 15px; }
@@ -33,7 +33,29 @@
 <body>
 
     <div id="screen-container">
-        <canvas id="display" width="160" height="144"></canvas>
+        <iframe id="emulator-iframe" srcdoc="
+            <!DOCTYPE html>
+            <html>
+            <head>
+                <style>
+                    body, html { margin:0; padding:0; width:100%; height:100%; background:#000; display:flex; justify-content:center; align-items:center; overflow:hidden; }
+                    #game { width:100vw; height:100vh; }
+                </style>
+            </head>
+            <body>
+                <div id='game'></div>
+                <script>
+                    EJS_player = '#game';
+                    EJS_core = 'gambatte';
+                    EJS_gameName = 'Pokemon Rojo';
+                    EJS_gameUrl = 'Roms/Pokemon - Rojo - GBC.gbc';
+                    EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
+                    EJS_startOnLoaded = true;
+                </script>
+                <script src='https://cdn.emulatorjs.org/stable/data/loader.js'></script>
+            </body>
+            </html>
+        "></iframe>
     </div>
 
     <div id="pad">
@@ -54,53 +76,32 @@
         </div>
     </div>
 
-    <!-- Cargador universal nativo por iframe ultraliviano -->
     <script>
-        const ROM_PATH = 'Roms/Pokemon - Rojo - GBC.gbc';
+        const iframe = document.getElementById('emulator-iframe');
 
-        // Simular eventos de teclado para el motor
-        function sendKey(key, code, isDown) {
+        function sendKey(code, isDown) {
+            if (!iframe.contentWindow) return;
             const eventType = isDown ? 'keydown' : 'keyup';
-            const event = new KeyboardEvent(eventType, {
-                key: key,
-                code: code,
-                keyCode: code,
-                which: code,
-                bubbles: true
-            });
-            window.dispatchEvent(event);
+            iframe.contentWindow.dispatchEvent(new KeyboardEvent(eventType, { keyCode: code, which: code, bubbles: true }));
         }
 
-        function bindTouch(id, key, code) {
+        function bindTouch(id, code) {
             const el = document.getElementById(id);
             if (!el) return;
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); sendKey(key, code, true); });
-            el.addEventListener('touchend', (e) => { e.preventDefault(); sendKey(key, code, false); });
-            el.addEventListener('mousedown', (e) => { e.preventDefault(); sendKey(key, code, true); });
-            el.addEventListener('mouseup', (e) => { e.preventDefault(); sendKey(key, code, false); });
+            el.addEventListener('touchstart', (e) => { e.preventDefault(); sendKey(code, true); });
+            el.addEventListener('touchend', (e) => { e.preventDefault(); sendKey(code, false); });
+            el.addEventListener('mousedown', (e) => { e.preventDefault(); sendKey(code, true); });
+            el.addEventListener('mouseup', (e) => { e.preventDefault(); sendKey(code, false); });
         }
 
-        // Mapeo estándar estilo Game Boy
-        bindTouch('btn-up', 'ArrowUp', 38);
-        bindTouch('btn-down', 'ArrowDown', 40);
-        bindTouch('btn-left', 'ArrowLeft', 37);
-        bindTouch('btn-right', 'ArrowRight', 39);
-        bindTouch('btn-a', 'x', 88);
-        bindTouch('btn-b', 'z', 90);
-        bindTouch('btn-start', 'Enter', 13);
-        bindTouch('btn-select', 'Shift', 16);
+        bindTouch('btn-up', 38);
+        bindTouch('btn-down', 40);
+        bindTouch('btn-left', 37);
+        bindTouch('btn-right', 39);
+        bindTouch('btn-a', 88);
+        bindTouch('btn-b', 90);
+        bindTouch('btn-start', 13);
+        bindTouch('btn-select', 16);
     </script>
-
-    <script type="text/javascript">
-        // Inicialización ligera de respaldo
-        EJS_player = '#screen-container';
-        EJS_core = 'gambatte';
-        EJS_gameName = 'Pokemon Rojo';
-        EJS_gameUrl = ROM_PATH;
-        EJS_pathtodata = 'https://cdn.jsdelivr.net/gh/emulatorjs/emulatorjs@main/data/';
-        EJS_startOnLoaded = true;
-        EJS_VirtualGamepadSettings = { enable: false };
-    </script>
-    <script src="https://cdn.jsdelivr.net/gh/emulatorjs/emulatorjs@main/data/loader.js"></script>
 </body>
 </html>
