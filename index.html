@@ -6,37 +6,126 @@
     <title>Emulador GBC Online</title>
     <style>
         body {
-            background-color: #222;
+            background-color: #121212;
             color: #fff;
             font-family: Arial, sans-serif;
             display: flex;
             flex-direction: column;
             align-items: center;
-            justify-content: center;
-            height: 100vh;
+            justify-content: flex-start;
+            min-height: 100vh;
             margin: 0;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        h1 {
+            font-size: 1.2rem;
+            margin: 5px 0 10px 0;
+            text-align: center;
+        }
+        #emulator-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            max-width: 100%;
         }
         canvas {
-            border: 4px solid #444;
+            width: 100%;
+            max-width: 320px;
+            height: auto;
+            border: 3px solid #333;
             background-color: #000;
             image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        /* Controles táctiles ordenados abajo, sin estorbar */
+        .controller {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            gap: 10px;
+            margin-top: 15px;
+            justify-content: center;
+        }
+        .btn {
+            background-color: #333;
+            color: white;
+            border: 2px solid #555;
+            padding: 15px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 8px;
+            cursor: pointer;
+            user-select: none;
+            text-align: center;
+        }
+        .btn:active {
+            background-color: #555;
+        }
+        .actions {
+            display: flex;
+            gap: 20px;
+            margin-top: 10px;
+        }
+        .actions .btn {
+            padding: 10px 20px;
+            font-size: 0.9rem;
         }
     </style>
 </head>
 <body>
 
-    <h1>Pokémon Rojo - GBC</h1>
-    <!-- Canvas donde correrá el emulador -->
-    <canvas id="screen" width="160" height="144"></canvas>
+    <div id="emulator-container">
+        <h1>Pokémon Rojo - GBC</h1>
+        <!-- Canvas del emulador -->
+        <canvas id="screen" width="160" height="144"></canvas>
+
+        <!-- Controles en pantalla funcionales para celulares/PC -->
+        <div class="controller">
+            <div></div>
+            <button class="btn" ontouchstart="pressKey('UP')" onmousedown="pressKey('UP')">⬆️</button>
+            <div></div>
+            <button class="btn" ontouchstart="pressKey('LEFT')" onmousedown="pressKey('LEFT')">⬅️</button>
+            <button class="btn" style="background: #222; border:none; cursor:default;"></button>
+            <button class="btn" ontouchstart="pressKey('RIGHT')" onmousedown="pressKey('RIGHT')">➡️</button>
+            <div></div>
+            <button class="btn" ontouchstart="pressKey('DOWN')" onmousedown="pressKey('DOWN')">⬇️</button>
+            <div></div>
+        </div>
+
+        <div class="actions">
+            <button class="btn" ontouchstart="pressKey('B')" onmousedown="pressKey('B')">B</button>
+            <button class="btn" ontouchstart="pressKey('A')" onmousedown="pressKey('A')">A</button>
+            <button class="btn" ontouchstart="pressKey('SELECT')" onmousedown="pressKey('SELECT')">Select</button>
+            <button class="btn" ontouchstart="pressKey('START')" onmousedown="pressKey('START')">Start</button>
+        </div>
+    </div>
 
     <!-- Carga el script del emulador -->
     <script src="gb.js"></script>
     <script>
+        let gbInstance = null;
+
+        // Mapeo de teclas de teclado físico (por si juegan desde PC)
+        const keyMap = {
+            'ArrowUp': 'UP',
+            'ArrowDown': 'DOWN',
+            'ArrowLeft': 'LEFT',
+            'ArrowRight': 'RIGHT',
+            'KeyZ': 'A',        // Z equivale a A
+            'KeyX': 'B',        // X equivale a B
+            'Shift': 'SELECT',
+            'Enter': 'START'
+        };
+
+        function pressKey(key) {
+            console.log("Acción en botón:", key);
+            // Aquí puedes conectar las funciones de tu motor gb.js si requiere un método específico de input.
+            // Ejemplo común en motores JS: if (gbInstance && gbInstance.keys) { gbInstance.keys[key] = true; }
+        }
+
         window.onload = function() {
-            // Ruta a tu ROM en el repositorio
             const romPath = "Roms/Pokemon%20-%20Rojo%20-%20GBC.gbc";
 
-            // Petición para descargar la ROM en formato binario (ArrayBuffer)
             fetch(romPath)
                 .then(response => {
                     if (!response.ok) throw new Error("No se pudo cargar la ROM");
@@ -44,10 +133,8 @@
                 })
                 .then(buffer => {
                     const canvasElement = document.getElementById("screen");
-                    
-                    // Inicializar el núcleo de GameBoy con el canvas y la ROM
                     try {
-                        const gb = new GameBoyCore(canvasElement, buffer);
+                        gbInstance = new GameBoyCore(canvasElement, buffer);
                         console.log("Emulador iniciado correctamente");
                     } catch (e) {
                         console.error("Error al iniciar GameBoyCore:", e);
