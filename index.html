@@ -2,106 +2,59 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Pokémon Rojo</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Emulador GBC Online</title>
     <style>
-        * { box-sizing: border-box; user-select: none; -webkit-user-select: none; touch-action: manipulation; }
-        body, html { margin: 0; padding: 0; width: 100%; height: 100%; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; display: flex; flex-direction: column; }
-        
-        #screen-container { width: 100vw; height: 42vh; display: flex; justify-content: center; align-items: center; background: #050505; }
-        #emulator-iframe { width: 100%; height: 100%; border: none; }
-
-        /* Controles estilo My Boy! */
-        #pad { width: 100vw; height: 58vh; background: #121212; display: flex; flex-direction: column; justify-content: space-around; padding: 15px; }
-        .main-controls { display: flex; justify-content: space-between; align-items: center; width: 100%; }
-        
-        .dpad { width: 150px; height: 150px; display: grid; grid-template-columns: repeat(3, 1fr); grid-template-rows: repeat(3, 1fr); }
-        .d-btn { background: #252525; border: 1px solid #3d3d3d; border-radius: 6px; display: flex; justify-content: center; align-items: center; font-size: 18px; color: #888; }
-        .d-btn:active { background: #555; color: #fff; }
-
-        .action-btns { display: flex; gap: 15px; align-items: center; margin-right: 10px; }
-        .a-b { width: 65px; height: 65px; border-radius: 50%; display: flex; justify-content: center; align-items: center; font-size: 22px; font-weight: bold; }
-        .btn-a { background: #b91c1c; border: 2px solid #ef4444; }
-        .btn-b { background: #d97706; border: 2px solid #f59e0b; margin-top: 20px; }
-        .a-b:active { opacity: 0.7; }
-
-        .sub-controls { display: flex; justify-content: center; gap: 30px; }
-        .s-btn { background: #2a2a2a; width: 80px; height: 30px; border-radius: 15px; font-size: 12px; display: flex; justify-content: center; align-items: center; color: #aaa; border: 1px solid #444; }
-        .s-btn:active { background: #555; color: #fff; }
+        body {
+            background-color: #222;
+            color: #fff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        canvas {
+            border: 4px solid #444;
+            background-color: #000;
+            image-rendering: pixelated;
+        }
     </style>
 </head>
 <body>
 
-    <div id="screen-container">
-        <iframe id="emulator-iframe" srcdoc="
-            <!DOCTYPE html>
-            <html>
-            <head>
-                <style>
-                    body, html { margin:0; padding:0; width:100%; height:100%; background:#000; display:flex; justify-content:center; align-items:center; overflow:hidden; }
-                    #game { width:100vw; height:100vh; }
-                </style>
-            </head>
-            <body>
-                <div id='game'></div>
-                <script>
-                    EJS_player = '#game';
-                    EJS_core = 'gambatte';
-                    EJS_gameName = 'Pokemon Rojo';
-                    EJS_gameUrl = 'Roms/Pokemon - Rojo - GBC.gbc';
-                    EJS_pathtodata = 'https://cdn.emulatorjs.org/stable/data/';
-                    EJS_startOnLoaded = true;
-                </script>
-                <script src='https://cdn.emulatorjs.org/stable/data/loader.js'></script>
-            </body>
-            </html>
-        "></iframe>
-    </div>
+    <h1>Pokémon Rojo - GBC</h1>
+    <!-- Canvas donde correrá el emulador -->
+    <canvas id="screen" width="160" height="144"></canvas>
 
-    <div id="pad">
-        <div class="main-controls">
-            <div class="dpad">
-                <div></div><div class="d-btn" id="btn-up">▲</div><div></div>
-                <div class="d-btn" id="btn-left">◄</div><div></div><div class="d-btn" id="btn-right">►</div>
-                <div></div><div class="d-btn" id="btn-down">▼</div><div></div>
-            </div>
-            <div class="action-btns">
-                <div class="a-b btn-b" id="btn-b">B</div>
-                <div class="a-b btn-a" id="btn-a">A</div>
-            </div>
-        </div>
-        <div class="sub-controls">
-            <div class="s-btn" id="btn-select">SELECT</div>
-            <div class="s-btn" id="btn-start">START</div>
-        </div>
-    </div>
-
+    <!-- Carga el script del emulador -->
+    <script src="gb.js"></script>
     <script>
-        const iframe = document.getElementById('emulator-iframe');
+        window.onload = function() {
+            // Ruta a tu ROM en el repositorio
+            const romPath = "Roms/Pokemon%20-%20Rojo%20-%20GBC.gbc";
 
-        function sendKey(code, isDown) {
-            if (!iframe.contentWindow) return;
-            const eventType = isDown ? 'keydown' : 'keyup';
-            iframe.contentWindow.dispatchEvent(new KeyboardEvent(eventType, { keyCode: code, which: code, bubbles: true }));
-        }
-
-        function bindTouch(id, code) {
-            const el = document.getElementById(id);
-            if (!el) return;
-            el.addEventListener('touchstart', (e) => { e.preventDefault(); sendKey(code, true); });
-            el.addEventListener('touchend', (e) => { e.preventDefault(); sendKey(code, false); });
-            el.addEventListener('mousedown', (e) => { e.preventDefault(); sendKey(code, true); });
-            el.addEventListener('mouseup', (e) => { e.preventDefault(); sendKey(code, false); });
-        }
-
-        bindTouch('btn-up', 38);
-        bindTouch('btn-down', 40);
-        bindTouch('btn-left', 37);
-        bindTouch('btn-right', 39);
-        bindTouch('btn-a', 88);
-        bindTouch('btn-b', 90);
-        bindTouch('btn-start', 13);
-        bindTouch('btn-select', 16);
+            // Petición para descargar la ROM en formato binario (ArrayBuffer)
+            fetch(romPath)
+                .then(response => {
+                    if (!response.ok) throw new Error("No se pudo cargar la ROM");
+                    return response.arrayBuffer();
+                })
+                .then(buffer => {
+                    const canvasElement = document.getElementById("screen");
+                    
+                    // Inicializar el núcleo de GameBoy con el canvas y la ROM
+                    try {
+                        const gb = new GameBoyCore(canvasElement, buffer);
+                        console.log("Emulador iniciado correctamente");
+                    } catch (e) {
+                        console.error("Error al iniciar GameBoyCore:", e);
+                    }
+                })
+                .catch(error => console.error("Error:", error));
+        };
     </script>
 </body>
 </html>
