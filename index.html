@@ -2,10 +2,30 @@
 <html lang="es">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Emulador GBC</title>
+    <title>GBC Web Emulator</title>
+    <style>
+        body { background: #111; color: #fff; text-align: center; font-family: sans-serif; }
+        canvas { background: #000; display: block; margin: 20px auto; border: 4px solid #333; }
+    </style>
 </head>
 <body>
+    <h1>GameBoy Color Emulator</h1>
+    <canvas id="screen" width="160" height="144"></canvas>
+    
     <script src="gb.js"></script>
+    <script>
+        window.onload = function() {
+            const canvas = document.getElementById("screen");
+            // Carga la ROM mediante fetch para pasar los datos binarios al motor
+            fetch("rom.gb")
+                .then(response => response.arrayBuffer())
+                .then(buffer => {
+                    const romBytes = new Uint8Array(buffer);
+                    window.gb = new GameBoyCore(canvas, romBytes);
+                    console.log("Emulador inicializado correctamente.");
+                })
+                .catch(err => console.error("Error al cargar la ROM:", err));
+        };
+    </script>
 </body>
 </html>
